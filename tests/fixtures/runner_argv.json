@@ -1,0 +1,70 @@
+{
+  "claude/supervised/headless": [
+    "claude",
+    "-p",
+    "do the task"
+  ],
+  "claude/supervised/interactive": [
+    "claude",
+    "do the task"
+  ],
+  "claude/autonomous/headless": [
+    "claude",
+    "--permission-mode",
+    "acceptEdits",
+    "--permission-prompts",
+    "none",
+    "-p",
+    "do the task"
+  ],
+  "claude/autonomous/interactive": [
+    "claude",
+    "--permission-mode",
+    "acceptEdits",
+    "do the task"
+  ],
+  "codex/supervised/headless": [
+    "codex",
+    "exec",
+    "do the task"
+  ],
+  "codex/supervised/interactive": [
+    "codex",
+    "do the task"
+  ],
+  "codex/autonomous/headless": [
+    "codex",
+    "exec",
+    "--sandbox",
+    "workspace-write",
+    "do the task"
+  ],
+  "codex/autonomous/interactive": [
+    "codex",
+    "--sandbox",
+    "workspace-write",
+    "do the task"
+  ],
+  "copilot/supervised/headless": [
+    "copilot",
+    "-p",
+    "do the task"
+  ],
+  "copilot/supervised/interactive": [
+    "copilot",
+    "-i",
+    "do the task"
+  ],
+  "copilot/autonomous/headless": [
+    "copilot",
+    "--allow-tool=write",
+    "-p",
+    "do the task"
+  ],
+  "copilot/autonomous/interactive": [
+    "copilot",
+    "--allow-tool=write",
+    "-i",
+    "do the task"
+  ]
+}
