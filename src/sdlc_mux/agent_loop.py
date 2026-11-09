@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from sdlc_mux.bootstrap import build_prompt
-from sdlc_mux.handoffs import Handoff, parse_handoff, write_handoff
+from sdlc_mux.handoffs import Handoff, HandoffError, parse_handoff, write_handoff
 from sdlc_mux.runners.base import Bundle, Profile, Runner
 
 
@@ -113,3 +113,26 @@ def run_task(
     f.write_text(write_handoff(out), encoding="utf-8")
     log_event(workspace, b.item, b.role, "outbox-written", f.name)
     return result
+
+
+def work_once(workspace: Path, role: str, runner: Runner, profile: Profile = "supervised") -> int:
+    """Run every inbox task of `role` not yet answered by a newer outbox handoff; return how many.
+
+    A malformed inbox file is logged and skipped. Never touches the board or gates.
+    """
+    ran = 0
+    for f in sorted(safe_path(workspace, "runs").glob(f"*/inbox/{role}/*.md")):
+        item = f.relative_to(safe_path(workspace, "runs")).parts[0]
+        try:
+            h = parse_handoff(f.read_text(encoding="utf-8"))
+        except HandoffError as e:
+            log_event(workspace, item, role, "bad-inbox", f"{f.name}: {e}")
+            continue
+        out = safe_path(workspace, "runs", item, "outbox", role, f"{h.stage}-{h.task}.md")
+        if out.exists() and out.stat().st_mtime >= f.stat().st_mtime:
+            continue  # already answered
+        d = item_dir(workspace, item)
+        run_task(workspace, Bundle(role, h.stage, item, d / "brief.md", d, h.task), runner,
+                 profile=profile)  # fmt: skip
+        ran += 1
+    return ran
