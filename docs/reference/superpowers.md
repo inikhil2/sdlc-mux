@@ -41,4 +41,11 @@ The README says each harness needs its own install.
 
 ## Where installed skills land, for `sdlc superpowers verify`
 
-UNVERIFIED for all three runners. The README does not say which directory a plugin install writes to, so `verify` cannot assume one. T7 must either find the plugin install locations (for example `claude plugin list`, `~/.claude/plugins/`) or have `verify` report "cannot check, install route is plugin-based".
+UNVERIFIED for all three runners. The README does not say which directory a plugin install writes to, so `verify` does not assume one. Resolved in T7 (2026-11-09): `verify` checks only the project skills folders a runner reads (`.claude/skills`, `.agents/skills`, and for Copilot also `.github/skills`). A skill found there is reported `[found]` with its path. Anything else is reported `[UNVERIFIED] cannot check on disk (plugin install)` with the plugin command, never as found and never as proven missing. `verify` exits 0 either way.
+
+## Mapping changes from Prompt.md (2026-11-09)
+
+- Skills sync targets: Prompt.md section 4 lists `~/.codex/skills` and `.github/skills`. Replaced by `.claude/skills` (Claude Code) and `.agents/skills` (Codex and Copilot), per [ADR 0009](../adr/0009-reuse-agents-skills-dir.md). The user-scope Codex folder is `~/.agents/skills` per [runners.md](runners.md); `sdlc skills sync` does not write to any home folder.
+- Superpowers install: Prompt.md section 9 falls back to cloning into `vendor/superpowers/` and copying skills. Not built. All three runners have a plugin route ([ADR 0008](../adr/0008-reuse-superpowers-via-runner-plugins.md)), and `sdlc superpowers install` prints that route without running it.
+- Catalogue: the engineers also run `verification-before-completion` (the section 8.2 example does), which section 8.1 omits.
+- Doctor: in autonomous mode a runner counts as verified only if every referenced skill is found on disk. A plugin-only install cannot be seen, so autonomous mode fails for it until the skills are also placed in a project skills folder.
