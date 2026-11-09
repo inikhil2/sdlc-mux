@@ -1,0 +1,59 @@
+# Action versions are major tags and UNVERIFIED (not looked up offline).
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install tmux (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y tmux
+      - name: Install tmux (macOS)
+        if: runner.os == 'macOS'
+        run: brew install tmux
+      - run: uv python install 3.12
+      - run: uv sync
+      - run: uv run pytest
+      - run: uv run ruff check
+      - run: uv run ruff format --check
+      - run: uv run mypy --strict src/sdlc_mux/config.py src/sdlc_mux/board.py src/sdlc_mux/gates.py
+      - run: uv run sdlc doctor --help
+
+  # Windows: non-tmux unit tests only, to document the limitation (Prompt.md section 17).
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv python install 3.12
+      - run: uv sync
+      - run: uv run pytest tests/test_config.py tests/test_board.py tests/test_gates.py tests/test_handoffs.py
+
+  # Not run locally (D6).
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: shellcheck scripts/*.sh .devcontainer/post-create.sh
+
+  # Not run locally (D6).
+  psscriptanalyzer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: |
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          $r = Invoke-ScriptAnalyzer -Path scripts -Recurse -Include *.ps1
+          $r | Format-Table
+          if ($r) { exit 1 }
