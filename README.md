@@ -110,6 +110,10 @@ Run: yes, output below (first lines of 125; it prints docs 00 and 01, with diagr
 
 Every command block in the docs carries a `Run:` line saying whether the build ran it and why not.
 
+## Diagrams
+
+[Architecture infographic](docs/architecture-infographic.html): what was built (tmux built, Zellij planned, Codex and Copilot runners UNVERIFIED). Open it in a browser.
+
 ## Try it
 
 Run `uv run sdlc doctor` and `uv run sdlc learn` as above, then open [start here](docs/00-start-here.md).
