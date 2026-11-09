@@ -1,0 +1,7 @@
+.DS_Store
+vendor/
+workspace/
+.venv/
+__pycache__/
+plan.md
+Prompt.md

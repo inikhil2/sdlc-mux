@@ -1,0 +1,59 @@
+# Default team for sdlc-mux. Phase 0 defaults (plan.md D2): macOS, Claude Code only,
+# mock first, 14 panes (13 agents + the dashboard).
+# Codex and Copilot CLIs are not installed on this machine, so every agent uses the
+# `claude` runner. Prompt.md section 7 assigns codex/copilot to some roles; switch those
+# agents back once the binaries exist. For an offline demo use `sdlc run ... --runner mock`.
+version: 1
+mode: supervised                  # supervised | autonomous
+defaults:
+  os: macos
+  demo_runner: mock
+  max_panes: 14
+superpowers:
+  repo: https://github.com/obra/superpowers
+  pinned_ref: "22f0b463e7a5e579904dd6211a520321035526f7"   # main at v7.0.2, verified 2026-11-09
+sections:
+  - name: Discovery
+    color: blue
+    agents:
+      - {role: product-owner, runner: claude}
+      - {role: business-analyst, runner: claude}
+      - {role: ux-designer, runner: claude}
+  - name: Architecture & Delivery
+    color: magenta
+    agents:
+      - {role: solution-architect, runner: claude}
+      - {role: scrum-master, runner: claude}
+  - name: Engineering
+    color: green
+    agents:
+      - {role: backend-engineer, runner: claude, instances: 2}
+      - {role: frontend-engineer, runner: claude}
+  - name: Quality
+    color: yellow
+    agents:
+      - {role: sdet, runner: claude}
+      - {role: qa-analyst, runner: claude}
+  - name: Governance
+    color: red
+    agents:
+      - {role: code-reviewer, runner: claude}
+      - {role: security-engineer, runner: claude}
+  - name: Operations
+    color: cyan
+    agents:
+      - {role: release-engineer, runner: claude}
+pipeline:
+  - {stage: discover, roles: [product-owner, business-analyst, ux-designer]}
+  - {stage: design, roles: [solution-architect]}
+  - {stage: plan, roles: [scrum-master, sdet]}
+  - {stage: build, roles: [backend-engineer, frontend-engineer]}
+  - {stage: test, roles: [sdet, qa-analyst]}
+  - {stage: review, roles: [code-reviewer, security-engineer]}
+  - {stage: release, roles: [release-engineer]}
+  - {stage: retro, roles: [scrum-master]}
+limits:
+  max_minutes_per_task: 30
+  max_retries: 2
+release:
+  auto_go_when_gates_green: false   # if true, release-engineer may write GO itself
