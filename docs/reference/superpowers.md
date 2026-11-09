@@ -1,5 +1,8 @@
 # Superpowers reference
 
+> **Status update 2026-11-09:** verified on this machine: Claude plugin `superpowers@claude-plugins-official` version 7.0.0, enabled, user scope (`claude plugin list`). Codex and Copilot routes are still UNVERIFIED here.
+
+
 Verified 2026-11-09.
 
 - Repo: https://github.com/obra/superpowers (MIT license)

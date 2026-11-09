@@ -1,5 +1,8 @@
 # Installers
 
+> **Status update 2026-11-09:** the owner reports the installers were run on another system. No output was captured in this repo, so the status below stays "written, not executed" on this record.
+
+
 Status of every file below: **written, not executed (D1)**. shellcheck and PSScriptAnalyzer **not run (D6)**. The only check was `bash -n` on the `.sh` files and a JSON parse of `devcontainer.json`; the `.ps1` was reviewed by hand.
 
 All scripts are idempotent (each step checks first), print each step, and end with `sdlc doctor`. Runner CLIs and Superpowers are printed, never run. Install commands marked UNVERIFIED follow [runners.md](runners.md).

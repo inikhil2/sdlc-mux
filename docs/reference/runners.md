@@ -1,5 +1,8 @@
 # Runner reference
 
+> **Status update 2026-11-09:** the owner reports Codex and Copilot CLI runs on another system. No command output was captured in this repo, so every UNVERIFIED flag below stays UNVERIFIED until output is recorded here.
+
+
 Verified 2026-11-09. Every row has a source and a status. `VERIFIED` means confirmed against `--help` output or an official page on that date. `UNVERIFIED` means not confirmed; do not rely on it.
 
 Local Claude Code version: 2.1.319. Full `claude --help` output is saved in [claude-help.txt](claude-help.txt).
