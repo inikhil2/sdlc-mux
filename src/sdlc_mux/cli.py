@@ -9,7 +9,7 @@ from typing import Annotated, cast
 
 import typer
 
-from sdlc_mux import dashboard
+from sdlc_mux import dashboard, superpowers
 from sdlc_mux.agent_loop import item_dir, log_event, work_once
 from sdlc_mux.config import Config, ConfigError, load_config
 from sdlc_mux.doctor import run_checks
@@ -20,10 +20,15 @@ from sdlc_mux.multiplexer.tmux import TmuxError
 from sdlc_mux.orchestrator import _runner_for, init_item, run_item
 from sdlc_mux.runners import RUNNERS
 from sdlc_mux.runners.base import Bundle, RiskRefusal
+from sdlc_mux.skills_sync import sync_skills
 
 app = typer.Typer(
     help="Run an SDLC pipeline with a team of AI agents in tmux.", no_args_is_help=True
 )
+skills_app = typer.Typer(help="Manage the sdlc skills.", no_args_is_help=True)
+superpowers_app = typer.Typer(help="Install and verify Superpowers.", no_args_is_help=True)
+app.add_typer(skills_app, name="skills")
+app.add_typer(superpowers_app, name="superpowers")
 
 
 @app.callback()
@@ -244,6 +249,44 @@ def agent_loop_cmd(
         n += 1
         if max_iterations == 0 or n < max_iterations:
             time.sleep(interval)
+
+
+@skills_app.command("sync")
+def skills_sync(
+    target_root: Annotated[Path, typer.Option(help="Project root to copy into.")] = Path("."),
+) -> None:
+    """Copy sdlc-protocol and the role skills into <target-root>/.claude/skills and .agents/skills."""
+    for d in sync_skills(target_root):
+        typer.echo(f"synced {d}")
+
+
+RunnerOpt = Annotated[str, typer.Option("--runner", help="claude | codex | copilot | all")]
+
+
+def _runners(runner: str) -> list[str]:
+    try:
+        return superpowers.pick_runners(runner)
+    except ValueError as e:
+        typer.echo(str(e), err=True)
+        raise typer.Exit(2) from e
+
+
+@superpowers_app.command("install")
+def superpowers_install(runner: RunnerOpt = "all") -> None:
+    """Print the verified plugin route for <runner>. Nothing is executed."""
+    typer.echo(superpowers.install_text(_runners(runner)))
+
+
+@superpowers_app.command("verify")
+def superpowers_verify(
+    runner: RunnerOpt = "all",
+    root: Annotated[Path, typer.Option(help="Project root to check.")] = Path("."),
+) -> None:
+    """Report, per runner, each Superpowers skill the roles use: found, or UNVERIFIED plus the fix.
+
+    Exits 0 even when skills are not found; non-zero only for a bad option.
+    """
+    typer.echo(superpowers.report(superpowers.verify(root, _runners(runner))))
 
 
 if __name__ == "__main__":
