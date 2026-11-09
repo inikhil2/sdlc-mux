@@ -2,6 +2,7 @@
 
 import getpass
 import os
+import re
 import shlex
 import time
 from pathlib import Path
@@ -37,6 +38,28 @@ def main() -> None:
 
 
 @app.command()
+def learn() -> None:
+    """Print a guided tour, built from docs/00-start-here.md and docs/01-concepts.md."""
+    parts = [DOCS / "00-start-here.md", DOCS / "01-concepts.md"]
+    if not all(p.is_file() for p in parts):
+        typer.echo(
+            "The tour is built from docs/00-start-here.md and docs/01-concepts.md, which are not "
+            "part of this install. Read them in the repository: "
+            "https://github.com/inikhil2/sdlc-mux/tree/main/docs",
+            err=True,
+        )
+        raise typer.Exit(1)
+    for n, p in enumerate(parts, 1):
+        text = re.sub(
+            r"```mermaid.*?```",
+            "(diagram: open the file to see it)",
+            p.read_text(),
+            flags=re.DOTALL,
+        )
+        typer.echo(f"=== Part {n} of {len(parts)}: docs/{p.name} ===\n\n{text.strip()}\n")
+
+
+@app.command()
 def doctor(
     config: Annotated[Path, typer.Option("--config", help="Path to sdlc.yaml.")] = Path(
         "sdlc.yaml"
@@ -53,6 +76,7 @@ def doctor(
 ConfigOpt = Annotated[Path, typer.Option("--config", help="Path to sdlc.yaml.")]
 WorkspaceOpt = Annotated[Path, typer.Option("--workspace", help="Workspace folder.")]
 SESSION = "sdlc"
+DOCS = Path(__file__).resolve().parents[2] / "docs"  # present in a checkout, not in a wheel
 
 
 def _mux() -> TmuxMultiplexer:
